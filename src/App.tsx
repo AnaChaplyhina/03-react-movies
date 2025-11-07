@@ -1,34 +1,83 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 
-function App() {
-  const [count, setCount] = useState(0)
+import React, { useState } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
+
+import SearchBar from './components/SearchBar/SearchBar';
+import MovieGrid from './components/MovieGrid/MovieGrid';
+import Loader from './components/Loader/Loader';
+import ErrorMessage from './components/ErrorMessage/ErrorMessage';
+import MovieModal from './components/MovieModal/MovieModal'; 
+
+import type { Movie } from './types/movie'; 
+import { fetchMovies } from './services/movieService';
+
+
+type Status = 'idle' | 'pending' | 'resolved' | 'rejected';
+
+const App: React.FC = () => {
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [status, setStatus] = useState<Status>('idle');
+  const [error, setError] = useState<string | null>(null);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const [query, setQuery] = useState<string>('');
+  
+  const handleSearch = async (newQuery: string) => {
+    if (newQuery === query) return;
+
+    setQuery(newQuery);
+    setMovies([]);
+    setError(null);
+    setStatus('pending');
+
+    try {
+      const { results } = await fetchMovies({ query: newQuery });
+
+      if (results.length === 0) {
+        toast.error('No movies found for your request.');
+        setStatus('resolved');
+        return;
+      }
+      
+      setMovies(results);
+      setStatus('resolved');
+    } catch (err) {
+      console.error(err);
+      setError('Failed to load movies. Please check your connection or try again later.');
+      setStatus('rejected');
+    }
+  };
+  
+  const handleSelectMovie = (movie: Movie) => {
+    setSelectedMovie(movie);
+  };
+  
+  const handleCloseModal = () => {
+    setSelectedMovie(null); 
+  };
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+      <SearchBar onSubmit={handleSearch} />
+      <main>
+        {status === 'pending' && <Loader />}
+        
+        {status === 'rejected' && <ErrorMessage message={error || undefined} />}
 
-export default App
+        {movies.length > 0 && status === 'resolved' && (
+          <MovieGrid movies={movies} onSelect={handleSelectMovie} />
+        )}
+        
+        {selectedMovie && (
+          <MovieModal 
+            movie={selectedMovie} 
+            onClose={handleCloseModal} 
+          />
+        )}
+      </main>
+
+      <Toaster position="top-right" reverseOrder={false} />
+    </>
+  );
+};
+
+export default App;
