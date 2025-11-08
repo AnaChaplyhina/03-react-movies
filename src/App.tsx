@@ -2,15 +2,19 @@
 import React, { useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 
+
 import SearchBar from './components/SearchBar/SearchBar';
 import MovieGrid from './components/MovieGrid/MovieGrid';
 import Loader from './components/Loader/Loader';
 import ErrorMessage from './components/ErrorMessage/ErrorMessage';
 import MovieModal from './components/MovieModal/MovieModal'; 
 
-import type { Movie } from './types/movie'; 
-import { fetchMovies } from './services/movieService';
 
+import type { Movie } from './types/movie'; 
+import { fetchMovies } from './services/movieService'; 
+
+
+import styles from './App.module.css'; 
 
 type Status = 'idle' | 'pending' | 'resolved' | 'rejected';
 
@@ -22,10 +26,11 @@ const App: React.FC = () => {
   const [query, setQuery] = useState<string>('');
   
   const handleSearch = async (newQuery: string) => {
+    
     if (newQuery === query) return;
 
     setQuery(newQuery);
-    setMovies([]);
+    setMovies([]); 
     setError(null);
     setStatus('pending');
 
@@ -41,6 +46,7 @@ const App: React.FC = () => {
       setMovies(results);
       setStatus('resolved');
     } catch (err) {
+      
       console.error(err);
       setError('Failed to load movies. Please check your connection or try again later.');
       setStatus('rejected');
@@ -58,7 +64,9 @@ const App: React.FC = () => {
   return (
     <>
       <SearchBar onSubmit={handleSearch} />
-      <main>
+    
+      <main className={styles.main}> 
+        
         {status === 'pending' && <Loader />}
         
         {status === 'rejected' && <ErrorMessage message={error || undefined} />}
@@ -75,7 +83,7 @@ const App: React.FC = () => {
         )}
       </main>
 
-      <Toaster position="top-right" reverseOrder={false} />
+      <Toaster position="top-center" reverseOrder={false} /> 
     </>
   );
 };

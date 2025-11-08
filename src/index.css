@@ -6,8 +6,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #0b0c0f;
-  /* Темний фон */
-  color: #c5c6c7;
 }
 
 code {

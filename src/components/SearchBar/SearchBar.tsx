@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import type { FormEvent } from 'react'; 
 import toast from 'react-hot-toast';
-import styles from './SearchBar.module.css';
+import styles from './SearchBar.module.css'; 
 
 interface SearchBarProps {
   onSubmit: (query: string) => void;
