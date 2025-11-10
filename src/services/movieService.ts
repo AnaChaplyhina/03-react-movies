@@ -1,8 +1,6 @@
 
 import axios from 'axios';
-import type { AxiosResponse } from 'axios';
 import type { Movie } from '../types/movie';
-
 
 interface MovieResponse {
   page: number;
@@ -11,24 +9,19 @@ interface MovieResponse {
   total_results: number;
 }
 
-
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
-
 const TMDB_TOKEN = import.meta.env.VITE_TMDB_TOKEN;
 
 interface FetchMoviesParams {
   query: string;
 }
 
-
 export const createImageUrl = (path: string | null, size: 'w500' | 'original' = 'w500'): string => {
   if (!path) {
-   
     return `https://via.placeholder.com/500x750?text=No+Image`; 
   }
   return `https://image.tmdb.org/t/p/${size}${path}`;
 };
-
 
 export async function fetchMovies({ query }: FetchMoviesParams): Promise<MovieResponse> {
   if (!TMDB_TOKEN) {
@@ -55,7 +48,9 @@ export async function fetchMovies({ query }: FetchMoviesParams): Promise<MovieRe
 
   try {
     const url = `${TMDB_BASE_URL}/search/movie`;
-    const response: AxiosResponse<MovieResponse> = await axios.get(url, config);
+
+    const response = await axios.get<MovieResponse>(url, config);
+    
     return response.data;
   } catch (error) {
     console.error("Error fetching movies:", error);
